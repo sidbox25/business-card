@@ -1,0 +1,73 @@
+version: "3.7"
+
+services:
+
+  application_dev:
+    image: dnd5e-tool-php-app
+    container_name: dnd5e-tool-php-app
+    build:
+      context: .
+      dockerfile: docker/App/Dockerfile
+      target: dev
+    environment:
+      - MYSQL_ROOT_PASSWORD=example
+      - MYSQL_HOST=db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=user
+      - APP_MYSQL_USER=root
+      - APP_MYSQL_PASSWORD=example
+      - APP_MYSQL_DRIVER=mysql
+      - APP_MYSQL_DB_NAME=dnd5eItemManager
+    volumes: #special case "mount vlume"
+      - ./:/var/www/html:rw
+
+  application_prod:
+    image: dnd5e-tool-php-app
+    container_name: dnd5e-tool-php-app
+    build:
+      context: .
+      dockerfile: docker/App/Dockerfile
+      target: base
+    environment:
+      - MYSQL_ROOT_PASSWORD=example
+      - MYSQL_HOST=db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=user
+      - APP_MYSQL_USER=root
+      - APP_MYSQL_PASSWORD=example
+      - APP_MYSQL_DRIVER=mysql
+      - APP_MYSQL_DB_NAME=dnd5eItemManager
+    volumes: #special case "mount vlume"
+      - ./:/var/www/html:rw
+    ports:
+      - 400:80
+#  database:
+#    image: dnd5e-tool-database
+#    build:
+#      context: .
+#      dockerfile: docker/Database/Dockerfile
+
+
+  db:
+    image: dnd5e-tool-database
+    build:
+      context: .
+      dockerfile: docker/Database/Dockerfile
+    # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=example
+      - MYSQL_HOST=db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=user
+      - APP_MYSQL_DRIVER=mysql
+      - APP_MYSQL_DB_NAME=dnd5eItemManager
+#    volumes:
+#      - docker/Database/DatabaseBackup:/var/lib/mysql:rw
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    links:
+      - db
